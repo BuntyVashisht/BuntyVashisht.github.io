@@ -16,7 +16,7 @@ For running this project you need to follow below steps :
   <img width="960" alt="Screenshot (7)" src="https://user-images.githubusercontent.com/36842230/166191023-113cb56d-63e8-440c-afb1-6b3c17c21266.png">
  
   3 b. Open file "myContract.sol"
-  3 c. Compile and deploy the file usingweb3 provider(or whatever environment you are working with).
+  3 c. Compile and deploy the file usingweb3 provider(or whatever environment you are working with). **Remember you need to connect your metamask account with remix.ethereum.io.**
   3 d. After deploy just copy the Address generated 
   <img width="960" alt="Screenshot (8)" src="https://user-images.githubusercontent.com/36842230/166191320-acf3ed69-07a2-41e4-918a-ce9785740bf6.png">
 
