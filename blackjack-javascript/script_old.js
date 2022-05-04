@@ -43,7 +43,7 @@ for (s in suits) {
 		var cardValue = n > 9 ? 10 : parseInt(n) + 1; // Generating card values for A,K,Q,J
 		//var cardValue = 1;
 
-		//Generating a random card	   
+		//Generating a random card
 		// Creating a card objet
 		var card = {                     
 			suit: suit,
@@ -204,140 +204,18 @@ function playend() {
 	var betvalue = parseInt(document.getElementById('mybet').value) * payoutJack;
 	if ((playervalue < 22 && dealervalue < playervalue) || (dealervalue > 21 && playervalue < 22)) {
 		//message.innerHTML += '<span style="color:green;">You WIN! You won $' + betvalue + '</span>';
-		//contract.methods.getBalance().call().then(function(bal){
-			//message.innerHTML += '<span style="color:green;">You WIN! Your current balance on metamask is : $' + bal + '</span>';
-			//console.log('I am inside the contracts function ===', bal);
-		//});
-		
-		web3.eth.requestAccounts().then(async function(accounts){
-			console.log('accounts===========',accounts);
-			const balance = await web3.eth.getBalance(accounts[0]);
-			const etherValue = web3.utils.fromWei(balance, 'ether');
-			let convFrom;
-			 if($(this).prop("name") == "eth") {
-				   convFrom = "eth";
-				   convTo = "usd";
-			 }
-			 else {
-				   convFrom = "usd";
-				   convTo = "eth";
-			 }
-			 console.log('convFrom=====',convFrom);
-			 console.log('convTo=====',convTo);
-			$.getJSON( "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum", 
-				function( data) {
-				var origAmount = etherValue;        
-				var exchangeRate = parseInt(data[0].current_price);
-				let amount;
-				convFrom = 'eth';
-				if(convFrom == "eth")
-				   amount = parseFloat(origAmount * exchangeRate);
-				else
-				   amount = parseFloat(origAmount/ exchangeRate); 
-				
-				
-				
-				console.log('amount=========',amount);
-				message.innerHTML += '<span style="color:green;">You WIN  $'+betvalue+'!<br/> Your current balance on metamask is : $ ' + amount.toFixed(2) + '</span>';
-				
-				console.log('I am inside the contracts function === dollar to eth',amount, '=', etherValue, typeof etherValue);
-				
-				origAmount = betvalue;
-				let amount1;
-				convFrom = 'usd';
-				if(convFrom == "eth")
-				   amount1 = parseFloat(origAmount * exchangeRate).toFixed(10);
-				else
-				   amount1 = parseFloat(origAmount/ exchangeRate).toFixed(10);
-				
-				amount1 = amount1.toString();
-				console.log('betvalue240=======dollar to eth =',betvalue,'=',amount1, typeof amount1);
-				
-				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
-				
-				sender = accounts[0]; //account address
-				receiver = accounts[0]; //contract address
-				
-				web3.eth.sendTransaction({to:sender, from:receiver, value:web3.utils.toWei(amount1, "ether"), gas: 4712388});
-			});
-				
-			
+		contract.methods.getBalance().call().then(function(bal){
+			message.innerHTML += '<span style="color:green;">You WIN! Your current balance on metamask is : $' + bal + '</span>';
+			console.log('I am inside the contracts function ===', bal);
 		});
-		
-		
-		
 		mydollars = mydollars + betvalue * 2;
 	} else if (playervalue > 21) {
-		web3.eth.requestAccounts().then((accounts) =>{
-			let convFrom;
-			 if($(this).prop("name") == "eth") {
-				   convFrom = "eth";
-				   convTo = "usd";
-			 }
-			 else {
-				   convFrom = "usd";
-				   convTo = "eth";
-			 }
-			 $.getJSON( "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum", 
-				function( data) {
-				var origAmount = betvalue;        
-				var exchangeRate = parseInt(data[0].current_price);
-				let amount;
-				if(convFrom == "eth")
-				   amount = parseFloat(origAmount * exchangeRate).toFixed(10);
-				else
-				   amount = parseFloat(origAmount/ exchangeRate).toFixed(10); 
-			   
-				amount = amount.toString();
-				console.log('Dollar to ether 261=========== dollar to eth=',betvalue,'=',amount);
-				
-				message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $' + betvalue + '</span>';
-				
-				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
-				
-				sender = accounts[0];
-				receiver = accounts[0]; //we have used same for testing purpose only
-				
-				web3.eth.sendTransaction({to:sender, from:receiver, value:web3.utils.toWei(amount, "ether"), gas: '4712388'});
-			});	
-		});
-		 	
+		message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $' + betvalue + '</span>';
 	} else if (playervalue == dealervalue) {
 		message.innerHTML += '<span style="color:blue;">PUSH</span>';
 		mydollars = mydollars + betvalue;
 	} else {
-		web3.eth.requestAccounts().then((accounts) =>{
-			let convFrom;
-			 if($(this).prop("name") == "eth") {
-				   convFrom = "eth";
-				   convTo = "usd";
-			 }
-			 else {
-				   convFrom = "usd";
-				   convTo = "eth";
-			 }
-			 $.getJSON( "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum", 
-				function( data) {
-				var origAmount = betvalue;        
-				var exchangeRate = parseInt(data[0].current_price);
-				let amount;
-				if(convFrom == "eth")
-				   amount = parseFloat(origAmount * exchangeRate).toFixed(10);
-				else
-				   amount = parseFloat(origAmount/ exchangeRate).toFixed(10); 
-				
-				amount = amount.toString();
-				console.log('Dollar to ether 292===========dollar to eth =======',betvalue,'=',amount);
-				message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $' + betvalue + '</span>';
-				
-				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
-				sender = accounts[0];
-				receiver = accounts[0]; //we have used same for testing purpose only
-				
-				web3.eth.sendTransaction({to:sender, from:receiver, value:web3.utils.toWei(amount, "ether"), gas: '4712388'});
-			});	
-		});
-		
+		message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $' + betvalue + '</span>';
 	}
 	pValue.innerHTML = playervalue;
 	dollarValue.innerHTML = mydollars;

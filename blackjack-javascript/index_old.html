@@ -7,23 +7,105 @@
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.2-rc.0/web3.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.slim.min.js" integrity="sha512-6ORWJX/LrnSjBzwefdNUyLCMTIsGoNP6NftMy2UAm1JBm6PRZCO1d7OHBStWpVFZLO+RerTvqX/Z9mBFfCJZ4A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+ 
   <script>
-	//injdected web3
+	// web3 lib instance
+		var contract;
 	$(document).ready(function(){
 		web3 = new Web3(window.ethereum);
+		var address = "0x73D459Ad5307820E0bC457B1c4dBb7CBedB15d4f";
+		var abi = [
+					{
+						"inputs": [],
+						"stateMutability": "nonpayable",
+						"type": "constructor"
+					},
+					{
+						"inputs": [
+							{
+								"internalType": "int256",
+								"name": "amt",
+								"type": "int256"
+							}
+						],
+						"name": "deposit",
+						"outputs": [],
+						"stateMutability": "nonpayable",
+						"type": "function"
+					},
+					{
+						"inputs": [],
+						"name": "getBalance",
+						"outputs": [
+							{
+								"internalType": "int256",
+								"name": "",
+								"type": "int256"
+							}
+						],
+						"stateMutability": "view",
+						"type": "function"
+					},
+					{
+						"inputs": [],
+						"name": "playerLost",
+						"outputs": [
+							{
+								"internalType": "string",
+								"name": "",
+								"type": "string"
+							}
+						],
+						"stateMutability": "view",
+						"type": "function"
+					},
+					{
+						"inputs": [
+							{
+								"internalType": "bool",
+								"name": "action",
+								"type": "bool"
+							}
+						],
+						"name": "triggerAction",
+						"outputs": [],
+						"stateMutability": "nonpayable",
+						"type": "function"
+					},
+					{
+						"inputs": [
+							{
+								"internalType": "int256",
+								"name": "amt",
+								"type": "int256"
+							}
+						],
+						"name": "withdraw",
+						"outputs": [],
+						"stateMutability": "nonpayable",
+						"type": "function"
+					}
+				];
+		contract = new web3.eth.Contract(abi, address);
+		  //contract.methods.getBalance().call().then(function(bal){
+			//$("#message").html(bal);
+		//});
+		setTimeout(function() {
+		console.log('This is in setTimeout');
+		var returningVal = $("#returningVal").val;
+		console.log('returningVal : ',returningVal, typeof returningVal);
+		 //contract.methods.triggerAction().call().then(function(){
+			//$("#message").html(bal); 
+		//});
+		},1000);
 	});
-  </script>
+  </script>	
 </head>
 
 <body>
   <div>
     <div>
       <h1>BlackJack Game</h1>
-	  <!--<div >
-        <button id="btnDeposit" type="button" class="btn">Deposit</button>
-        <button id="btnWithdraw" type="button" class="btn">WIthdraw</button>
-      </div>-->
       <!-- Creating a game start -->
       <div id="message">Press Start Button</div>  
 	  <input type="hidden" id="returningVal" name="returningVal" />
