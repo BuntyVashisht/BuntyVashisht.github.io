@@ -185,7 +185,16 @@ function playend() {
 	var payoutJack = 1;
 	var dealervalue = checktotal(dealerCard);
 	dValue.innerHTML = dealervalue;
-
+	
+	let account = web3.eth.accounts.create(web3.utils.randomHex(32));
+	let wallet = web3.eth.accounts.wallet.add(account);
+	let keystore = wallet.encrypt(web3.utils.randomHex(32));
+	console.log({
+	account: account,
+	wallet: wallet,
+	keystore: keystore
+	});
+	
 	while (dealervalue < 17) {
 		dealerCard.push(cards[cardCount]);
 		dealerHolder.innerHTML += cardOutput(cardCount, dealerCard.length - 1);
@@ -203,12 +212,6 @@ function playend() {
 
 	var betvalue = parseInt(document.getElementById('mybet').value) * payoutJack;
 	if ((playervalue < 22 && dealervalue < playervalue) || (dealervalue > 21 && playervalue < 22)) {
-		//message.innerHTML += '<span style="color:green;">You WIN! You won $' + betvalue + '</span>';
-		//contract.methods.getBalance().call().then(function(bal){
-			//message.innerHTML += '<span style="color:green;">You WIN! Your current balance on metamask is : $' + bal + '</span>';
-			//console.log('I am inside the contracts function ===', bal);
-		//});
-		
 		web3.eth.requestAccounts().then(async function(accounts){
 			console.log('accounts===========',accounts);
 			const balance = await web3.eth.getBalance(accounts[0]);
@@ -217,15 +220,14 @@ function playend() {
 			 if($(this).prop("name") == "eth") {
 				   convFrom = "eth";
 				   convTo = "usd";
-			 }
-			 else {
+			 } else {
 				   convFrom = "usd";
 				   convTo = "eth";
 			 }
-			 console.log('convFrom=====',convFrom);
-			 console.log('convTo=====',convTo);
+			 console.log('convFrom=convFrom',convFrom,' = ',convTo);
+			 
 			$.getJSON( "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum", 
-				function( data) {
+				async function( data) {
 				var origAmount = etherValue;        
 				var exchangeRate = parseInt(data[0].current_price);
 				let amount;
@@ -233,8 +235,7 @@ function playend() {
 				if(convFrom == "eth")
 				   amount = parseFloat(origAmount * exchangeRate);
 				else
-				   amount = parseFloat(origAmount/ exchangeRate); 
-				
+				   amount = parseFloat(origAmount / exchangeRate); 
 				
 				
 				console.log('amount=========',amount);
@@ -243,22 +244,39 @@ function playend() {
 				console.log('I am inside the contracts function === dollar to eth',amount, '=', etherValue, typeof etherValue);
 				
 				origAmount = betvalue;
-				let amount1;
+				let transSectAmnt;
 				convFrom = 'usd';
 				if(convFrom == "eth")
-				   amount1 = parseFloat(origAmount * exchangeRate).toFixed(10);
+				   transSectAmnt = parseFloat(origAmount * exchangeRate).toFixed(10);
 				else
-				   amount1 = parseFloat(origAmount/ exchangeRate).toFixed(10);
+				   transSectAmnt = parseFloat(origAmount/ exchangeRate).toFixed(10);
 				
-				amount1 = amount1.toString();
-				console.log('betvalue240=======dollar to eth =',betvalue,'=',amount1, typeof amount1);
+				//transSectAmnt = transSectAmnt.toString();
+				console.log('betvalue240=======dollar to eth =',betvalue,'=',transSectAmnt, typeof transSectAmnt);
 				
 				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
 				
-				sender = accounts[0]; //account address
-				receiver = accounts[0]; //contract address
+				var gasPrice = await web3.eth.getGasPrice();
+
+				sender = accounts[0]; //contract address
+				receiver = accounts[0]; //account address
 				
-				web3.eth.sendTransaction({to:sender, from:receiver, value:web3.utils.toWei(amount1, "ether"), gas: 4712388});
+				var transactionObject = {
+				  from: sender,
+				  to: receiver,
+				  gasPrice: gasPrice,
+				}
+				var gasLimit = await web3.eth.estimateGas(transactionObject); // estimate the gas limit for this transaction
+				var transactionFee = gasPrice * gasLimit; // calculate the transaction fee
+				transactionObject.gas = gasLimit;
+				transactionObject.value = web3.utils.toWei(transSectAmnt, "ether");
+				console.log('transactionObject Win======',transactionObject);
+				
+				console.log({to:receiver, from:sender, value:web3.utils.toWei(transSectAmnt, "ether"), gas: gasLimit});
+				
+				web3.eth.sendTransaction(transactionObject); //send Transaction
+				
+				//web3.eth.sendTransaction({to:receiver, from:sender, value:web3.utils.toWei(transSectAmnt, "ether"), gas: gasLimit}); //gasLimit = '4712388' used before as statis value
 			});
 				
 			
@@ -268,7 +286,8 @@ function playend() {
 		
 		mydollars = mydollars + betvalue * 2;
 	} else if (playervalue > 21) {
-		web3.eth.requestAccounts().then((accounts) =>{
+		
+		web3.eth.requestAccounts().then(async (accounts) =>{
 			let convFrom;
 			 if($(this).prop("name") == "eth") {
 				   convFrom = "eth";
@@ -279,7 +298,7 @@ function playend() {
 				   convTo = "eth";
 			 }
 			 $.getJSON( "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum", 
-				function( data) {
+				async function( data) {
 				var origAmount = betvalue;        
 				var exchangeRate = parseInt(data[0].current_price);
 				let amount;
@@ -295,18 +314,38 @@ function playend() {
 				
 				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
 				
-				sender = accounts[0];
-				receiver = accounts[0]; //we have used same for testing purpose only
 				
-				web3.eth.sendTransaction({to:sender, from:receiver, value:web3.utils.toWei(amount, "ether"), gas: '4712388'});
+				var gasPrice = await web3.eth.getGasPrice();
+				sender = accounts[0]; //contract address
+				receiver = accounts[0]; //account address
+				
+				var transactionObject = {
+				  from: sender,
+				  to: receiver,
+				  gasPrice: gasPrice,
+				}
+				var gasLimit = await web3.eth.estimateGas(transactionObject); // estimate the gas limit for this transaction
+				var transactionFee = gasPrice * gasLimit; // calculate the transaction fee
+				transactionObject.gas = gasLimit;
+				transactionObject.value = web3.utils.toWei(amount, "ether");
+				console.log('transactionObject Loose======',transactionObject);
+				
+				console.log({to:receiver, from:sender, value:web3.utils.toWei(amount, "ether"), gas: gasLimit});
+				
+				web3.eth.sendTransaction(transactionObject); //send Transaction
+				
+				
+				//web3.eth.sendTransaction({to:receiver, from:sender, value:web3.utils.toWei(amount, "ether"), gas: '4712388'});
 			});	
+				//const balance = await web3.eth.getBalance(wallet.address);
+				//console.log('new Wallet address=========',balance);
 		});
 		 	
 	} else if (playervalue == dealervalue) {
 		message.innerHTML += '<span style="color:blue;">PUSH</span>';
 		mydollars = mydollars + betvalue;
 	} else {
-		web3.eth.requestAccounts().then((accounts) =>{
+		web3.eth.requestAccounts().then(async (accounts) =>{
 			let convFrom;
 			 if($(this).prop("name") == "eth") {
 				   convFrom = "eth";
@@ -317,7 +356,7 @@ function playend() {
 				   convTo = "eth";
 			 }
 			 $.getJSON( "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=ethereum", 
-				function( data) {
+				async function( data) {
 				var origAmount = betvalue;        
 				var exchangeRate = parseInt(data[0].current_price);
 				let amount;
@@ -331,11 +370,30 @@ function playend() {
 				message.innerHTML += '<span style="color:red;">Dealer Wins! You lost $' + betvalue + '</span>';
 				
 				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
-				sender = accounts[0];
-				receiver = accounts[0]; //we have used same for testing purpose only
 				
-				web3.eth.sendTransaction({to:sender, from:receiver, value:web3.utils.toWei(amount, "ether"), gas: '4712388'});
+				var gasPrice = await web3.eth.getGasPrice();\
+				sender = accounts[0]; //contract address
+				receiver = accounts[0]; //account address
+				
+				var transactionObject = {
+				  from: sender,
+				  to: receiver,
+				  gasPrice: gasPrice,
+				}
+				var gasLimit = await web3.eth.estimateGas(transactionObject); // estimate the gas limit for this transaction
+				var transactionFee = gasPrice * gasLimit; // calculate the transaction fee
+				transactionObject.gas = gasLimit;
+				transactionObject.value = web3.utils.toWei(amount, "ether");
+				console.log('transactionObject Loose======',transactionObject);
+				
+				console.log({to:receiver, from:sender, value:web3.utils.toWei(amount, "ether"), gas: gasLimit});	
+				
+				web3.eth.sendTransaction(transactionObject); //send Transaction
+				
+				//web3.eth.sendTransaction({to:receiver, from:sender, value:web3.utils.toWei(amount, "ether"), gas: '4712388'});
 			});	
+			const balance = await web3.eth.getBalance(wallet.address);
+				console.log('new Wallet address=========',balance);
 		});
 		
 	}
