@@ -371,7 +371,7 @@ function playend() {
 				
 				console.log('Sender and Receiver are same for all transactions untill it is on testing and using one wallet.');
 				
-				var gasPrice = await web3.eth.getGasPrice();\
+				var gasPrice = await web3.eth.getGasPrice();
 				sender = accounts[0]; //contract address
 				receiver = accounts[0]; //account address
 				
